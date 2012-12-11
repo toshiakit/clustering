@@ -62,7 +62,7 @@ p.footer {
   color: gray;
 }
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Chapter 3: Discovering Groups</a></li><li><a href="#2">Hierarchical Clustering (Pages 33-40)</a></li><li><a href="#3">Column Clustering (Pages 40-42)</a></li><li><a href="#4">K-Means Clustering (Pages 42-44)</a></li><li><a href="#5">Clusters of Preferences (Pages 44-46)</a></li><li><a href="#6">Clustring Results (Page 47-48)</a></li><li><a href="#7">Viewing Data in Two Dimensions (Pages 49-51)</a></li><li><a href="#8">Plot Multidimensional Scaling Result (Pages 51-52)</a></li></ul></div><h2>Chapter 3: Discovering Groups<a name="1"></a></h2><p>"Programming Collective Intelligence - Building Smart Web 2.0 Applications" by Toby Segaran (O'Reilly Media, ISBN-10: 0-596-52932-5)</p><p>Here we use the sample dataset from the book. The book provides sample Python codes to get RSS feeds of the select blogs and count the words in those feeds to prepare the dataset. The idea is that one could use word frequency to determine if they write similar subjects or in similar styles.</p><p>The dataset is word counts organized by blog names (rows) x words (columns), but I will skip the dataset preparation steps (pages 29-33). One could possibly write RSS feed parser using xmlread function to get the data. feedlist.txt is included for creating dataset.</p><p>For this chapter we need to use features of Statistics Toolbox. This toolbox provides a wonderful data type called 'dataset' and we can use it to import the data.</p><pre class="codeinput">blogdata = dataset(<span class="string">'file'</span>,<span class="string">'blogdata.txt'</span>,<span class="keyword">...</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Chapter 3: Discovering Groups</a></li><li><a href="#2">Hierarchical Clustering (Pages 33-40)</a></li><li><a href="#3">Column Clustering (Pages 40-42)</a></li><li><a href="#4">K-Means Clustering (Pages 42-44)</a></li><li><a href="#5">Clusters of Preferences (Pages 44-46)</a></li><li><a href="#6">Clustering Results (Page 47-48)</a></li><li><a href="#7">Viewing Data in Two Dimensions (Pages 49-51)</a></li><li><a href="#8">Plot Multidimensional Scaling Result (Pages 51-52)</a></li></ul></div><h2>Chapter 3: Discovering Groups<a name="1"></a></h2><p>"Programming Collective Intelligence - Building Smart Web 2.0 Applications" by Toby Segaran (O'Reilly Media, ISBN-10: 0-596-52932-5)</p><p>Here we use the sample dataset from the book. The book provides sample Python codes to get RSS feeds of the select blogs and count the words in those feeds to prepare the dataset. The idea is that one could use word frequency to determine if they write similar subjects or in similar styles.</p><p>The dataset is word counts organized by blog names (rows) x words (columns), but I will skip the dataset preparation steps (pages 29-33). One could possibly write RSS feed parser using xmlread function to get the data. feedlist.txt is included for creating dataset.</p><p>For this chapter we need to use features of Statistics Toolbox. This toolbox provides a wonderful data type called 'dataset' and we can use it to import the data.</p><pre class="codeinput">blogdata = dataset(<span class="string">'file'</span>,<span class="string">'blogdata.txt'</span>,<span class="keyword">...</span>
     <span class="string">'delimiter'</span>,<span class="string">'\t'</span>,<span class="keyword">...</span>
     <span class="string">'ReadVarNames'</span>, true,<span class="keyword">...</span>
     <span class="string">'ReadObsNames'</span>, true);
@@ -75,7 +75,7 @@ blognames = get(blogdata, <span class="string">'ObsNames'</span>);
 
 <span class="comment">% convert the dataset to standard matrix</span>
 data = double(blogdata);
-</pre><h2>Hierarchical Clustering (Pages 33-40)<a name="2"></a></h2><p>Statistics Toolbox already provides functions to support Hierarchical Clustering, so I don't have to write any custom function.</p><p>Here, we use the familiar Pearson Correlation Coefficient to determine the distances, in order to offset the 'grade inflation' caused by varying degrees of word counts by blogs that Euclidean distance cannot deal with. Statisitcs Toolbox has 'corr' function that uses Pearson Correlation Coefficient by default.</p><pre class="codeinput">distances = pdist(data,<span class="string">'corr'</span>);
+</pre><h2>Hierarchical Clustering (Pages 33-40)<a name="2"></a></h2><p>Statistics Toolbox already provides functions to support Hierarchical Clustering, so I don't have to write any custom function.</p><p>Here, we use the familiar Pearson Correlation Coefficient to determine the distances, in order to offset the 'grade inflation' caused by varying degrees of word counts by blogs that Euclidean distance cannot deal with. Statistics Toolbox has 'corr' function that uses Pearson Correlation Coefficient by default.</p><pre class="codeinput">distances = pdist(data,<span class="string">'corr'</span>);
 
 <span class="comment">% distances = pearson(data);</span>
 <span class="comment">% This is custom function I wrote - see 'pearson.m' - but the results is</span>
@@ -95,7 +95,7 @@ dendrogram(clusters, <span class="string">'orientation'</span>,<span class="stri
 <span class="comment">% groupings=cluster(clusters, 'cutoff', 1.0496);</span>
 
 <span class="comment">% That's it! Very simple.</span>
-</pre><img vspace="5" hspace="5" src="clustering_01.png" alt=""> <h2>Column Clustering (Pages 40-42)<a name="3"></a></h2><p>Do hierachical clustering using words in the columns, rather than blog names. To do this, we simply have to transpose the data. The results shows which words are commonly used together. In marketing study, this could be used to which items are commonly bought together, for example. This reminds me of an urban legend that paper dipers and beer cases are bought together because dads buy them togther.</p><pre class="codeinput">rdata=data';
+</pre><img vspace="5" hspace="5" src="clustering_01.png" alt=""> <h2>Column Clustering (Pages 40-42)<a name="3"></a></h2><p>Do hierarchical clustering using words in the columns, rather than blog names. To do this, we simply have to transpose the data. The results show which words are commonly used together. In marketing study, this could be used to which items are commonly bought together, for example. This reminds me of an urban legend that paper diapers and beer cases are bought together because dads buy them together.</p><pre class="codeinput">rdata=data';
 distances = pdist(rdata,<span class="string">'corr'</span>);
 clusters=linkage(distances);
 dendrogram(clusters, <span class="string">'orientation'</span>,<span class="string">'left'</span>,<span class="string">'labels'</span>,words');
@@ -130,13 +130,11 @@ dendrogram(clusters, <span class="string">'orientation'</span>,<span class="stri
 <span class="comment">% here I pick '4'.</span>
 x=find(idx==4);
 disp(blognames(x,1))
-</pre><pre class="codeoutput">    'The Superficial - Because You're Ugly'
-    'Wonkette'
+</pre><pre class="codeoutput">    'Wonkette'
     'Eschaton'
     'Hot Air'
     'Talking Points Memo: by Joshua Micah Marshall'
     'Daily Kos'
-    'Go Fug Yourself'
     'Andrew Sullivan | The Daily Dish'
     'Michelle Malkin'
     'SpikedHumor'
@@ -149,8 +147,6 @@ disp(blognames(x,1))
     'NewsBusters.org - Exposing Liberal Media Bias'
     'MetaFilter'
     'Instapundit.com'
-    'PerezHilton.com'
-    'Gawker'
     'The Huffington Post | Raw Feed'
 
 </pre><h2>Clusters of Preferences (Pages 44-46)<a name="5"></a></h2><p>We now use a new dataset from a website called Zebo (htt://www.zebo.com). The book provides sample Python codes to download data from this website and create the new dataset. This requires parsing of plain unstructured HTML pages rather than well structured XML response, so it would be harder to implement in MATLAB. Again I am going to use the pre-made dataset the author of the book provides.</p><pre class="codeinput"><span class="comment">% we are going to use a new set of data, so clear the Workspace.</span>
@@ -173,7 +169,7 @@ wants = get(zebodata, <span class="string">'ObsNames'</span>);
 
 <span class="comment">% convert the dataset to standard matrix</span>
 data = double(zebodata);
-</pre><h2>Clustring Results (Page 47-48)<a name="6"></a></h2><p>Because the dataset is 0-1 binary, Pearson Correlation Coefficient is no longer suitable. The book recommends Tanimoto coefficient as a more suitable metric. I found an implementation of Tanimoto distance function (tanimoto.m) in MATLAB Central which emulates pdist function: <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13405&amp;objectType=file">http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13405&amp;objectType=file</a></p><pre class="codeinput">distances = tanimoto(data);
+</pre><h2>Clustering Results (Page 47-48)<a name="6"></a></h2><p>Because the dataset is 0-1 binary, Pearson Correlation Coefficient is no longer suitable. The book recommends Tanimoto coefficient as a more suitable metric. I found an implementation of Tanimoto distance function (tanimoto.m) in MATLAB Central which emulates pdist function: <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13405&amp;objectType=file">http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13405&amp;objectType=file</a></p><pre class="codeinput">distances = tanimoto(data);
 clusters=linkage(distances);
 dendrogram(clusters, <span class="string">'orientation'</span>,<span class="string">'left'</span>,<span class="string">'labels'</span>,wants);
 
@@ -240,7 +236,7 @@ data = double(blogdata);
 % Here, we use the familiar Pearson Correlation Coefficient to determine
 % the distances, in order to offset the 'grade inflation' caused by varying
 % degrees of word counts by blogs that Euclidean distance cannot deal with.
-% Statisitcs Toolbox has 'corr' function that uses Pearson Correlation 
+% Statistics Toolbox has 'corr' function that uses Pearson Correlation 
 % Coefficient by default. 
 
 distances = pdist(data,'corr');
@@ -266,12 +262,12 @@ dendrogram(clusters, 'orientation','left','labels',blognames');
 
 %% Column Clustering (Pages 40-42)
 %
-% Do hierachical clustering using words in the columns, rather than blog
+% Do hierarchical clustering using words in the columns, rather than blog
 % names. To do this, we simply have to transpose the data. The results
-% shows which words are commonly used together. In marketing study, this
+% show which words are commonly used together. In marketing study, this
 % could be used to which items are commonly bought together, for example.
-% This reminds me of an urban legend that paper dipers and beer cases are 
-% bought together because dads buy them togther. 
+% This reminds me of an urban legend that paper diapers and beer cases are 
+% bought together because dads buy them together. 
 
 rdata=data';
 distances = pdist(rdata,'corr');
@@ -347,7 +343,7 @@ wants = get(zebodata, 'ObsNames');
 % convert the dataset to standard matrix
 data = double(zebodata);
 
-%% Clustring Results (Page 47-48)
+%% Clustering Results (Page 47-48)
 %
 % Because the dataset is 0-1 binary, Pearson Correlation Coefficient is no
 % longer suitable. The book recommends Tanimoto coefficient as a more 
