@@ -38,7 +38,7 @@ data = double(blogdata);
 % Here, we use the familiar Pearson Correlation Coefficient to determine
 % the distances, in order to offset the 'grade inflation' caused by varying
 % degrees of word counts by blogs that Euclidean distance cannot deal with.
-% Statisitcs Toolbox has 'corr' function that uses Pearson Correlation 
+% Statistics Toolbox has 'corr' function that uses Pearson Correlation 
 % Coefficient by default. 
 
 distances = pdist(data,'corr');
@@ -64,12 +64,12 @@ dendrogram(clusters, 'orientation','left','labels',blognames');
 
 %% Column Clustering (Pages 40-42)
 %
-% Do hierachical clustering using words in the columns, rather than blog
+% Do hierarchical clustering using words in the columns, rather than blog
 % names. To do this, we simply have to transpose the data. The results
-% shows which words are commonly used together. In marketing study, this
+% show which words are commonly used together. In marketing study, this
 % could be used to which items are commonly bought together, for example.
-% This reminds me of an urban legend that paper dipers and beer cases are 
-% bought together because dads buy them togther. 
+% This reminds me of an urban legend that paper diapers and beer cases are 
+% bought together because dads buy them together. 
 
 rdata=data';
 distances = pdist(rdata,'corr');
@@ -145,7 +145,7 @@ wants = get(zebodata, 'ObsNames');
 % convert the dataset to standard matrix
 data = double(zebodata);
 
-%% Clustring Results (Page 47-48)
+%% Clustering Results (Page 47-48)
 %
 % Because the dataset is 0-1 binary, Pearson Correlation Coefficient is no
 % longer suitable. The book recommends Tanimoto coefficient as a more 
