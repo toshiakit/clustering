@@ -1,0 +1,400 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>clustering</title><meta name="generator" content="MATLAB 7.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-10"><meta name="DC.source" content="clustering.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Chapter 3: Discovering Groups</a></li><li><a href="#2">Hierarchical Clustering (Pages 33-40)</a></li><li><a href="#3">Column Clustering (Pages 40-42)</a></li><li><a href="#4">K-Means Clustering (Pages 42-44)</a></li><li><a href="#5">Clusters of Preferences (Pages 44-46)</a></li><li><a href="#6">Clustring Results (Page 47-48)</a></li><li><a href="#7">Viewing Data in Two Dimensions (Pages 49-51)</a></li><li><a href="#8">Plot Multidimensional Scaling Result (Pages 51-52)</a></li></ul></div><h2>Chapter 3: Discovering Groups<a name="1"></a></h2><p>"Programming Collective Intelligence - Building Smart Web 2.0 Applications" by Toby Segaran (O'Reilly Media, ISBN-10: 0-596-52932-5)</p><p>Here we use the sample dataset from the book. The book provides sample Python codes to get RSS feeds of the select blogs and count the words in those feeds to prepare the dataset. The idea is that one could use word frequency to determine if they write similar subjects or in similar styles.</p><p>The dataset is word counts organized by blog names (rows) x words (columns), but I will skip the dataset preparation steps (pages 29-33). One could possibly write RSS feed parser using xmlread function to get the data. feedlist.txt is included for creating dataset.</p><p>For this chapter we need to use features of Statistics Toolbox. This toolbox provides a wonderful data type called 'dataset' and we can use it to import the data.</p><pre class="codeinput">blogdata = dataset(<span class="string">'file'</span>,<span class="string">'blogdata.txt'</span>,<span class="keyword">...</span>
+    <span class="string">'delimiter'</span>,<span class="string">'\t'</span>,<span class="keyword">...</span>
+    <span class="string">'ReadVarNames'</span>, true,<span class="keyword">...</span>
+    <span class="string">'ReadObsNames'</span>, true);
+
+<span class="comment">% get list of words from the dataset as cell array</span>
+words = get(blogdata, <span class="string">'VarNames'</span>);
+
+<span class="comment">% get list of blog names from the dataset as cell array</span>
+blognames = get(blogdata, <span class="string">'ObsNames'</span>);
+
+<span class="comment">% convert the dataset to standard matrix</span>
+data = double(blogdata);
+</pre><h2>Hierarchical Clustering (Pages 33-40)<a name="2"></a></h2><p>Statistics Toolbox already provides functions to support Hierarchical Clustering, so I don't have to write any custom function.</p><p>Here, we use the familiar Pearson Correlation Coefficient to determine the distances, in order to offset the 'grade inflation' caused by varying degrees of word counts by blogs that Euclidean distance cannot deal with. Statisitcs Toolbox has 'corr' function that uses Pearson Correlation Coefficient by default.</p><pre class="codeinput">distances = pdist(data,<span class="string">'corr'</span>);
+
+<span class="comment">% distances = pearson(data);</span>
+<span class="comment">% This is custom function I wrote - see 'pearson.m' - but the results is</span>
+<span class="comment">% the same as the above line of code.</span>
+
+<span class="comment">% Create hierarchical clustering using 'linkage' function</span>
+clusters=linkage(distances);
+
+<span class="comment">% Create dendorgram using 'dendrogram' function</span>
+dendrogram(clusters, <span class="string">'orientation'</span>,<span class="string">'left'</span>,<span class="string">'labels'</span>,blognames');
+
+<span class="comment">% get inconsistency coefficients, which is in the 4th column</span>
+<span class="comment">% I = inconsistent(clusters);</span>
+
+<span class="comment">% get groupings of clusters based on a certain inconsistency coefficient</span>
+<span class="comment">% threshold</span>
+<span class="comment">% groupings=cluster(clusters, 'cutoff', 1.0496);</span>
+
+<span class="comment">% That's it! Very simple.</span>
+</pre><img vspace="5" hspace="5" src="clustering_01.png" alt=""> <h2>Column Clustering (Pages 40-42)<a name="3"></a></h2><p>Do hierachical clustering using words in the columns, rather than blog names. To do this, we simply have to transpose the data. The results shows which words are commonly used together. In marketing study, this could be used to which items are commonly bought together, for example. This reminds me of an urban legend that paper dipers and beer cases are bought together because dads buy them togther.</p><pre class="codeinput">rdata=data';
+distances = pdist(rdata,<span class="string">'corr'</span>);
+clusters=linkage(distances);
+dendrogram(clusters, <span class="string">'orientation'</span>,<span class="string">'left'</span>,<span class="string">'labels'</span>,words');
+</pre><img vspace="5" hspace="5" src="clustering_02.png" alt=""> <h2>K-Means Clustering (Pages 42-44)<a name="4"></a></h2><p>Hierarchical Clustering produces nice tree view as a result, but it doesn't really break the data into distinct groups without additional work. With K-means clustering, you can specify number of distinct clusters to generate.</p><pre class="codeinput"><span class="comment">% compute K-means clustering</span>
+<span class="comment">% pick a value for k -- I use '4'</span>
+<span class="comment">% determining the right k value is the hardest part of K-means clustering.</span>
+
+[idx,ctrs]=kmeans(data,4,<span class="string">'distance'</span>,<span class="string">'corr'</span>);
+
+<span class="comment">% display silhouette plot and check out how well clusters are separated.</span>
+<span class="comment">% silhouette(data,idx,'corr');</span>
+<span class="comment">% set(get(gca,'Children'),'FaceColor',[.8 .8 1])</span>
+<span class="comment">% xlabel('Silhouette Value')</span>
+<span class="comment">% ylabel('Cluster')</span>
+
+<span class="comment">% display data plot with centroids</span>
+<span class="comment">% plot(data(idx==1,1),data(idx==1,2),'r.','MarkerSize',12)</span>
+<span class="comment">% hold on</span>
+<span class="comment">% plot(data(idx==2,1),data(idx==2,2),'b.','MarkerSize',12)</span>
+<span class="comment">% hold on</span>
+<span class="comment">% plot(data(idx==3,1),data(idx==3,2),'g.','MarkerSize',12)</span>
+<span class="comment">% hold on</span>
+<span class="comment">% plot(data(idx==4,1),data(idx==4,2),'y.','MarkerSize',12)</span>
+<span class="comment">% plot(ctrs(:,1),ctrs(:,2),ctrs(:,3),ctrs(:,4),'kx',...</span>
+<span class="comment">%      'MarkerSize',12,'LineWidth',2)</span>
+<span class="comment">% plot(ctrs(:,1),ctrs(:,2),'ko',...</span>
+<span class="comment">%      'MarkerSize',12,'LineWidth',2)</span>
+<span class="comment">% legend('Cluster 1','Cluster 2','Cluster 3','Cluster 4','Centroids',...</span>
+<span class="comment">%        'Location','NW')</span>
+
+<span class="comment">% pick an cluster index to display the related blogs in the cluster</span>
+<span class="comment">% here I pick '4'.</span>
+x=find(idx==4);
+disp(blognames(x,1))
+</pre><pre class="codeoutput">    'The Superficial - Because You're Ugly'
+    'Wonkette'
+    'Eschaton'
+    'Hot Air'
+    'Talking Points Memo: by Joshua Micah Marshall'
+    'Daily Kos'
+    'Go Fug Yourself'
+    'Andrew Sullivan | The Daily Dish'
+    'Michelle Malkin'
+    'SpikedHumor'
+    'Captain's Quarters'
+    'Power Line'
+    'The Blotter'
+    'Crooks and Liars'
+    'Think Progress'
+    'Little Green Footballs'
+    'NewsBusters.org - Exposing Liberal Media Bias'
+    'MetaFilter'
+    'Instapundit.com'
+    'PerezHilton.com'
+    'Gawker'
+    'The Huffington Post | Raw Feed'
+
+</pre><h2>Clusters of Preferences (Pages 44-46)<a name="5"></a></h2><p>We now use a new dataset from a website called Zebo (htt://www.zebo.com). The book provides sample Python codes to download data from this website and create the new dataset. This requires parsing of plain unstructured HTML pages rather than well structured XML response, so it would be harder to implement in MATLAB. Again I am going to use the pre-made dataset the author of the book provides.</p><pre class="codeinput"><span class="comment">% we are going to use a new set of data, so clear the Workspace.</span>
+clear <span class="string">all</span>;
+
+<span class="comment">% Since the source data file is in the sam format, we can reuse the same</span>
+<span class="comment">% script as before. The dataset is 0 (no interest) or 1 (interested)</span>
+<span class="comment">% organized by items(rows) x people (columns),</span>
+
+zebodata = dataset(<span class="string">'file'</span>,<span class="string">'zebo.txt'</span>,<span class="keyword">...</span>
+    <span class="string">'delimiter'</span>,<span class="string">'\t'</span>,<span class="keyword">...</span>
+    <span class="string">'ReadVarNames'</span>, true,<span class="keyword">...</span>
+    <span class="string">'ReadObsNames'</span>, true);
+
+<span class="comment">% get list of words from the dataset as cell array</span>
+people = get(zebodata, <span class="string">'VarNames'</span>);
+
+<span class="comment">% get list of blog names from the dataset as cell array</span>
+wants = get(zebodata, <span class="string">'ObsNames'</span>);
+
+<span class="comment">% convert the dataset to standard matrix</span>
+data = double(zebodata);
+</pre><h2>Clustring Results (Page 47-48)<a name="6"></a></h2><p>Because the dataset is 0-1 binary, Pearson Correlation Coefficient is no longer suitable. The book recommends Tanimoto coefficient as a more suitable metric. I found an implementation of Tanimoto distance function (tanimoto.m) in MATLAB Central which emulates pdist function: <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13405&amp;objectType=file">http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13405&amp;objectType=file</a></p><pre class="codeinput">distances = tanimoto(data);
+clusters=linkage(distances);
+dendrogram(clusters, <span class="string">'orientation'</span>,<span class="string">'left'</span>,<span class="string">'labels'</span>,wants);
+
+<span class="comment">% One of the resulting cluster shows 'cash', 'boyfriend', 'career' etc.</span>
+<span class="comment">% grouped together. There are a lot of sad people out there.</span>
+</pre><img vspace="5" hspace="5" src="clustering_03.png" alt=""> <h2>Viewing Data in Two Dimensions (Pages 49-51)<a name="7"></a></h2><p>So far the sample datasets are made up of two sets of variables, so we could plot them in 2D space. But in real life data doesn't always fit neatly into 2D, but we human have difficulty visualizing data in multi-dimensions. A technique called Multidimensional Scaling reduces complex dataset into 2D representation.</p><p>Here we go back to the blog data we used earlier, so let's bring them back.</p><pre class="codeinput">clear <span class="string">all</span>;
+blogdata = dataset(<span class="string">'file'</span>,<span class="string">'blogdata.txt'</span>,<span class="keyword">...</span>
+    <span class="string">'delimiter'</span>,<span class="string">'\t'</span>,<span class="keyword">...</span>
+    <span class="string">'ReadVarNames'</span>, true,<span class="keyword">...</span>
+    <span class="string">'ReadObsNames'</span>, true);
+words = get(blogdata, <span class="string">'VarNames'</span>);
+blognames = get(blogdata, <span class="string">'ObsNames'</span>);
+data = double(blogdata);
+
+<span class="comment">% get the distance using Pearson Correlation Coefficient.</span>
+distances = pdist(data,<span class="string">'corr'</span>);
+</pre><h2>Plot Multidimensional Scaling Result (Pages 51-52)<a name="8"></a></h2><p>Here is MATLAB function for Multidimensional Scaling</p><pre class="codeinput">[Y,eigvals] = cmdscale(distances);
+
+<span class="comment">% Plot the result</span>
+plot(Y(:,1),Y(:,2),<span class="string">'.'</span>)
+text(Y(:,1)+0.01,Y(:,2),blognames)
+xlabel(<span class="string">'Distance'</span>)
+ylabel(<span class="string">'Distance'</span>)
+</pre><img vspace="5" hspace="5" src="clustering_04.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.13<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Chapter 3: Discovering Groups
+% "Programming Collective Intelligence - Building Smart Web 2.0 Applications" 
+% by Toby Segaran (O'Reilly Media, ISBN-10: 0-596-52932-5)
+%
+% Here we use the sample dataset from the book. The book provides sample
+% Python codes to get RSS feeds of the select blogs and count the words in
+% those feeds to prepare the dataset. The idea is that one could use word
+% frequency to determine if they write similar subjects or in similar
+% styles.
+%
+% The dataset is word counts organized by blog names (rows) x words (columns), 
+% but I will skip the dataset preparation steps (pages 29-33). One could 
+% possibly write RSS feed parser using xmlread function to get the data.
+% feedlist.txt is included for creating dataset.
+%
+% For this chapter we need to use features of Statistics Toolbox. This
+% toolbox provides a wonderful data type called 'dataset' and we can use it
+% to import the data.
+blogdata = dataset('file','blogdata.txt',...
+    'delimiter','\t',...
+    'ReadVarNames', true,...
+    'ReadObsNames', true);
+
+% get list of words from the dataset as cell array
+words = get(blogdata, 'VarNames');
+
+% get list of blog names from the dataset as cell array
+blognames = get(blogdata, 'ObsNames');
+
+% convert the dataset to standard matrix
+data = double(blogdata);
+
+%% Hierarchical Clustering (Pages 33-40)
+%
+% Statistics Toolbox already provides functions to support Hierarchical
+% Clustering, so I don't have to write any custom function. 
+%
+% Here, we use the familiar Pearson Correlation Coefficient to determine
+% the distances, in order to offset the 'grade inflation' caused by varying
+% degrees of word counts by blogs that Euclidean distance cannot deal with.
+% Statisitcs Toolbox has 'corr' function that uses Pearson Correlation 
+% Coefficient by default. 
+
+distances = pdist(data,'corr');
+
+% distances = pearson(data); 
+% This is custom function I wrote - see 'pearson.m' - but the results is 
+% the same as the above line of code.
+
+% Create hierarchical clustering using 'linkage' function
+clusters=linkage(distances);
+
+% Create dendorgram using 'dendrogram' function
+dendrogram(clusters, 'orientation','left','labels',blognames');
+
+% get inconsistency coefficients, which is in the 4th column
+% I = inconsistent(clusters);
+
+% get groupings of clusters based on a certain inconsistency coefficient
+% threshold
+% groupings=cluster(clusters, 'cutoff', 1.0496);
+
+% That's it! Very simple. 
+
+%% Column Clustering (Pages 40-42)
+%
+% Do hierachical clustering using words in the columns, rather than blog
+% names. To do this, we simply have to transpose the data. The results
+% shows which words are commonly used together. In marketing study, this
+% could be used to which items are commonly bought together, for example.
+% This reminds me of an urban legend that paper dipers and beer cases are 
+% bought together because dads buy them togther. 
+
+rdata=data';
+distances = pdist(rdata,'corr');
+clusters=linkage(distances);
+dendrogram(clusters, 'orientation','left','labels',words');
+
+%% K-Means Clustering (Pages 42-44)
+%
+% Hierarchical Clustering produces nice tree view as a result, but it
+% doesn't really break the data into distinct groups without additional
+% work. With K-means clustering, you can specify number of distinct 
+% clusters to generate.
+
+% compute K-means clustering
+% pick a value for k REPLACE_WITH_DASH_DASH I use '4'
+% determining the right k value is the hardest part of K-means clustering.
+
+[idx,ctrs]=kmeans(data,4,'distance','corr');
+
+% display silhouette plot and check out how well clusters are separated.
+% silhouette(data,idx,'corr');
+% set(get(gca,'Children'),'FaceColor',[.8 .8 1])
+% xlabel('Silhouette Value')
+% ylabel('Cluster')
+
+% display data plot with centroids
+% plot(data(idx==1,1),data(idx==1,2),'r.','MarkerSize',12)
+% hold on
+% plot(data(idx==2,1),data(idx==2,2),'b.','MarkerSize',12)
+% hold on
+% plot(data(idx==3,1),data(idx==3,2),'g.','MarkerSize',12)
+% hold on
+% plot(data(idx==4,1),data(idx==4,2),'y.','MarkerSize',12)
+% plot(ctrs(:,1),ctrs(:,2),ctrs(:,3),ctrs(:,4),'kx',...
+%      'MarkerSize',12,'LineWidth',2)
+% plot(ctrs(:,1),ctrs(:,2),'ko',...
+%      'MarkerSize',12,'LineWidth',2)
+% legend('Cluster 1','Cluster 2','Cluster 3','Cluster 4','Centroids',...
+%        'Location','NW')
+
+% pick an cluster index to display the related blogs in the cluster
+% here I pick '4'.
+x=find(idx==4);
+disp(blognames(x,1))
+
+%% Clusters of Preferences (Pages 44-46)
+%
+% We now use a new dataset from a website called Zebo (htt://www.zebo.com).
+% The book provides sample Python codes to download data from this website
+% and create the new dataset. This requires parsing of plain unstructured 
+% HTML pages rather than well structured XML response, so it would be
+% harder to implement in MATLAB. Again I am going to use the pre-made
+% dataset the author of the book provides. 
+
+% we are going to use a new set of data, so clear the Workspace.
+clear all;
+
+% Since the source data file is in the sam format, we can reuse the same
+% script as before. The dataset is 0 (no interest) or 1 (interested) 
+% organized by items(rows) x people (columns),
+
+zebodata = dataset('file','zebo.txt',...
+    'delimiter','\t',...
+    'ReadVarNames', true,...
+    'ReadObsNames', true);
+
+% get list of words from the dataset as cell array
+people = get(zebodata, 'VarNames');
+
+% get list of blog names from the dataset as cell array
+wants = get(zebodata, 'ObsNames');
+
+% convert the dataset to standard matrix
+data = double(zebodata);
+
+%% Clustring Results (Page 47-48)
+%
+% Because the dataset is 0-1 binary, Pearson Correlation Coefficient is no
+% longer suitable. The book recommends Tanimoto coefficient as a more 
+% suitable metric. I found an implementation of Tanimoto distance function 
+% (tanimoto.m) in MATLAB Central which emulates pdist function:
+% http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13405&objectType=file
+
+distances = tanimoto(data);
+clusters=linkage(distances);
+dendrogram(clusters, 'orientation','left','labels',wants);
+
+% One of the resulting cluster shows 'cash', 'boyfriend', 'career' etc.
+% grouped together. There are a lot of sad people out there. 
+
+%% Viewing Data in Two Dimensions (Pages 49-51)
+%
+% So far the sample datasets are made up of two sets of variables, so we
+% could plot them in 2D space. But in real life data doesn't always fit
+% neatly into 2D, but we human have difficulty visualizing data in
+% multi-dimensions. A technique called Multidimensional Scaling reduces 
+% complex dataset into 2D representation. 
+%
+% Here we go back to the blog data we used earlier, so let's bring them
+% back.
+
+clear all;
+blogdata = dataset('file','blogdata.txt',...
+    'delimiter','\t',...
+    'ReadVarNames', true,...
+    'ReadObsNames', true);
+words = get(blogdata, 'VarNames');
+blognames = get(blogdata, 'ObsNames');
+data = double(blogdata);
+
+% get the distance using Pearson Correlation Coefficient.
+distances = pdist(data,'corr');
+
+%% Plot Multidimensional Scaling Result (Pages 51-52)
+%
+% Here is MATLAB function for Multidimensional Scaling
+[Y,eigvals] = cmdscale(distances);
+
+% Plot the result
+plot(Y(:,1),Y(:,2),'.')
+text(Y(:,1)+0.01,Y(:,2),blognames)
+xlabel('Distance')
+ylabel('Distance')
+
+##### SOURCE END #####
+--></body></html>
